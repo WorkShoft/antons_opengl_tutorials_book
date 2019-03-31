@@ -1,0 +1,3 @@
+/home/mikel/opengl/antons_opengl_tutorials_book/32_skinnng_part_three/build/CMakeFiles/rebuild_cache.dir
+/home/mikel/opengl/antons_opengl_tutorials_book/32_skinnng_part_three/build/CMakeFiles/main.dir
+/home/mikel/opengl/antons_opengl_tutorials_book/32_skinnng_part_three/build/CMakeFiles/edit_cache.dir

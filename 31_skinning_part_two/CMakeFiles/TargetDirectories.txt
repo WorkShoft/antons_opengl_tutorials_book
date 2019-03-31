@@ -1,0 +1,3 @@
+/home/mikel/opengl/antons_opengl_tutorials_book/31_skinning_part_two/CMakeFiles/rebuild_cache.dir
+/home/mikel/opengl/antons_opengl_tutorials_book/31_skinning_part_two/CMakeFiles/skin.dir
+/home/mikel/opengl/antons_opengl_tutorials_book/31_skinning_part_two/CMakeFiles/edit_cache.dir

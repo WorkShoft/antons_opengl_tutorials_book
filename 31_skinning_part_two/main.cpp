@@ -27,7 +27,10 @@
 #define GL_LOG_FILE "gl.log"
 #define VERTEX_SHADER_FILE "test_vs.glsl"
 #define FRAGMENT_SHADER_FILE "test_fs.glsl"
-#define MESH_FILE "monkey_with_skeleton_y_up.dae"
+//#define MESH_FILE "monkey_with_skeleton_y_up.dae"
+#define MESH_FILE "Mario2.fbx"
+//#define MESH_FILE "sci_fi5.fbx"
+
 /* max bones allowed in a mesh */
 #define MAX_BONES 32
 
@@ -403,6 +406,19 @@ int main() {
 	/* apply a model matrix that rotates our mesh up the correct way */
 	mat4 model_mat = identity_mat4();
 
+	//load textures
+	int tex_a_location = glGetUniformLocation( shader_programme, "texture1" );	
+	glUniform1i( tex_a_location, 0 );
+
+        GLuint tex_a;
+        glActiveTexture( GL_TEXTURE0 );
+        ( load_texture( "../32_skinnng_part_three/mario_main.png", &tex_a ) );
+	//( load_texture( "Untitled.png", &tex_a ) );
+
+        glBindTexture( GL_TEXTURE_2D, tex_a );
+	// end load textures
+	
+
 	glUseProgram( shader_programme );
 	int model_mat_location = glGetUniformLocation( shader_programme, "model" );
 	glUniformMatrix4fv( model_mat_location, 1, GL_FALSE, model_mat.m );
@@ -506,13 +522,13 @@ int main() {
 		bool monkey_moved = false;
 		if ( glfwGetKey( g_window, 'Z' ) ) {
 			theta += rot_speed * elapsed_seconds;
-			g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
+			//g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
 			g_local_anims[1] = rotate_z_deg( identity_mat4(), -theta );
 			monkey_moved = true;
 		}
 		if ( glfwGetKey( g_window, 'X' ) ) {
 			theta -= rot_speed * elapsed_seconds;
-			g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
+			//g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
 			g_local_anims[1] = rotate_z_deg( identity_mat4(), -theta );
 			monkey_moved = true;
 		}

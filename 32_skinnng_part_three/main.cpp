@@ -27,7 +27,7 @@
 #define GL_LOG_FILE "gl.log"
 #define VERTEX_SHADER_FILE "test_vs.glsl"
 #define FRAGMENT_SHADER_FILE "test_fs.glsl"
-#define MESH_FILE "monkey_with_anim_y_up.dae"
+#define MESH_FILE "Mario2.fbx"
 //#define MESH_FILE "Cylinder2.dae"
 /* max bones allowed in a mesh */
 #define MAX_BONES 32
@@ -322,6 +322,7 @@ bool load_mesh( const char *file_name, GLuint *vao, int *point_count,
 
 			/* get [inverse] offset matrix for each bone */
 			bone_offset_mats[b_i] = convert_assimp_matrix( bone->mOffsetMatrix );
+			
 
 			/* get bone weights
 			we can just assume weight is always 1.0, because we are just using 1 bone
@@ -454,21 +455,57 @@ bool load_mesh( const char *file_name, GLuint *vao, int *point_count,
 	if ( mesh->HasTangentsAndBitangents() ) {
 		// NB: could store/print tangents here
 	}
-	if ( mesh->HasBones() ) {
-		GLuint vbo;
-		glGenBuffers( 1, &vbo );
-		glBindBuffer( GL_ARRAY_BUFFER, vbo );
-		glBufferData( GL_ARRAY_BUFFER, *point_count * sizeof( GLint ), bone_ids,
-									GL_STATIC_DRAW );
-		glVertexAttribIPointer( 3, 1, GL_INT, 0, NULL );
-		glEnableVertexAttribArray( 3 );
-		free( bone_ids );
-	}
+  if(mesh->HasBones()){
+
+    *bone_count = (int)mesh->mNumBones;
+
+    char bone_names[256][64];
+  
+    for(int b_i=0; b_i < *bone_count; b_i++){
+
+      const aiBone* bone = mesh->mBones[b_i];
+      strcpy (bone_names[b_i], bone->mName.data);
+      printf("bone_names[%i]=%s\n", b_i, bone_names[b_i]);
+      bone_offset_mats[b_i] = convert_assimp_matrix( bone -> mOffsetMatrix);
+      bone_ids = (int*)malloc(*point_count * sizeof (int));
+
+      /* bone weights */
+      int num_weights = (int)bone->mNumWeights;
+
+      for (int w_i = 0; w_i < num_weights; w_i++){
+	aiVertexWeight weight = bone->mWeights[w_i];
+	int vertex_id = (int)weight.mVertexId;
+	// ignore weight if less than 0.5 factor
+	// if(weight.mWeight >= 0.5f){
+	//   bone_ids[vertex_id] = b_i;
+	// }
+      }
+    }
+    
+    /* bone vbo */
+
+    GLuint vbo;
+    glGenBuffers (1, &vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+		 GL_ARRAY_BUFFER,
+		 *point_count * sizeof (GLint),
+		 bone_ids,
+		 GL_STATIC_DRAW
+		 );
+    glVertexAttribIPointer(3, 1, GL_INT, 0, NULL);
+    glEnableVertexAttribArray (3);
+    free (bone_ids);
+  } else {
+
+  }
+
 
 	aiReleaseImport( scene );
 	printf( "mesh loaded\n" );
 
 	return true;
+  
 }
 
 int main() {
@@ -571,9 +608,19 @@ int main() {
 		sprintf( name, "bone_matrices[%i]", i );
 		bone_matrices_locations[i] = glGetUniformLocation( shader_programme, name );
 		glUniformMatrix4fv( bone_matrices_locations[i], 1, GL_FALSE,
-												identity_mat4().m );
+				    identity_mat4().m );
 	}
 
+	//load textures
+	int tex_a_location = glGetUniformLocation( shader_programme, "texture1" );	
+	glUniform1i( tex_a_location, 0 );
+
+        GLuint tex_a;
+        glActiveTexture( GL_TEXTURE0 );
+        ( load_texture( "mario_main.png.001.png", &tex_a ) );
+        glBindTexture( GL_TEXTURE_2D, tex_a );
+	// end load textures
+	
 	glUseProgram( bones_shader_programme );
 	int bones_view_mat_location =
 		glGetUniformLocation( bones_shader_programme, "view" );
@@ -607,11 +654,11 @@ int main() {
 		glDrawArrays( GL_TRIANGLES, 0, monkey_point_count );
 
 		glDisable( GL_DEPTH_TEST );
-		glEnable( GL_PROGRAM_POINT_SIZE );
-		glUseProgram( bones_shader_programme );
-		glBindVertexArray( bones_vao );
-		glDrawArrays( GL_POINTS, 0, monkey_bone_count );
-		glDisable( GL_PROGRAM_POINT_SIZE );
+		 glEnable( GL_PROGRAM_POINT_SIZE );
+		 glUseProgram( bones_shader_programme );
+		 glBindVertexArray( bones_vao );
+		// glDrawArrays( GL_POINTS, 0, monkey_bone_count );
+		 glDisable( GL_PROGRAM_POINT_SIZE );
 
 		// update other events like input handling
 		glfwPollEvents();
