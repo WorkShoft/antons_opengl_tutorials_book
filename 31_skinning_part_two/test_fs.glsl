@@ -8,8 +8,9 @@ out vec4 frag_colour;
 
 void main() {
 
-
-  vec4 texel_a = texture (texture1, st);
-  frag_colour = texel_a;
+  //frag_colour = vec4(colour, 1.0);
+   vec4 texel_a = texture (texture1, st);
+   frag_colour = texel_a;
+  
   
 }
