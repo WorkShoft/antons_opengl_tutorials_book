@@ -20,6 +20,9 @@
 #include <assimp/cimport.h>			// C importer
 #include <assimp/postprocess.h> // various extra operations
 #include <assimp/scene.h>				// collects data
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #define _USE_MATH_DEFINES
@@ -28,7 +31,7 @@
 #define VERTEX_SHADER_FILE "test_vs.glsl"
 #define FRAGMENT_SHADER_FILE "test_fs.glsl"
 //#define MESH_FILE "monkey_with_skeleton_y_up.dae"
-#define MESH_FILE "Mario2.fbx"
+#define MESH_FILE "Mario3.fbx"
 //#define MESH_FILE "sci_fi5.fbx"
 
 /* max bones allowed in a mesh */
@@ -274,9 +277,9 @@ bool load_mesh( const char *file_name, GLuint *vao, int *point_count,
 		GLuint vbo;
 		glGenBuffers( 1, &vbo );
 		glBindBuffer( GL_ARRAY_BUFFER, vbo );
-		glBufferData( GL_ARRAY_BUFFER, 3 * *point_count * sizeof( GLfloat ), points,
-									GL_STATIC_DRAW );
+		glBufferData( GL_ARRAY_BUFFER, 3 * *point_count * sizeof( GLfloat ), points, GL_STATIC_DRAW );
 		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+		
 		glEnableVertexAttribArray( 0 );
 		free( points );
 	}
@@ -287,6 +290,7 @@ bool load_mesh( const char *file_name, GLuint *vao, int *point_count,
 		glBufferData( GL_ARRAY_BUFFER, 3 * *point_count * sizeof( GLfloat ), normals,
 									GL_STATIC_DRAW );
 		glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+		
 		glEnableVertexAttribArray( 1 );
 		free( normals );
 	}
@@ -297,6 +301,7 @@ bool load_mesh( const char *file_name, GLuint *vao, int *point_count,
 		glBufferData( GL_ARRAY_BUFFER, 2 * *point_count * sizeof( GLfloat ), texcoords,
 									GL_STATIC_DRAW );
 		glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 0, NULL );
+		
 		glEnableVertexAttribArray( 2 );
 		free( texcoords );
 	}
@@ -368,7 +373,8 @@ int main() {
 	glBindBuffer( GL_ARRAY_BUFFER, bones_vbo );
 	glBufferData( GL_ARRAY_BUFFER, 3 * monkey_bone_count * sizeof( float ),
 								bone_positions, GL_STATIC_DRAW );
-	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+	//glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+	glVertexAttribIPointer( 0, 3, GL_FLOAT, 0, NULL );
 	glEnableVertexAttribArray( 0 );
 
 	/*-------------------------------CREATE
@@ -448,7 +454,15 @@ int main() {
 	float rot_speed = 50.0f; // 50 radians per second
 	float y = 0.0;					 // position of head
 
+	glm::mat4 trans = glm::mat4(1.0f);
+
+	trans = glm::rotate(trans, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+	unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
 	while ( !glfwWindowShouldClose( g_window ) ) {
+	  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		static double previous_seconds = glfwGetTime();
 		double current_seconds = glfwGetTime();
 		double elapsed_seconds = current_seconds - previous_seconds;
@@ -456,7 +470,7 @@ int main() {
 
 		_update_fps_counter( g_window );
 		// wipe the drawing surface clear
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		
 		glViewport( 0, 0, g_gl_width, g_gl_height );
 
 		glEnable( GL_DEPTH_TEST );
@@ -464,12 +478,12 @@ int main() {
 		glBindVertexArray( monkey_vao );
 		glDrawArrays( GL_TRIANGLES, 0, monkey_point_count );
 
-		glDisable( GL_DEPTH_TEST );
-		glEnable( GL_PROGRAM_POINT_SIZE );
-		glUseProgram( bones_shader_programme );
-		glBindVertexArray( bones_vao );
-		glDrawArrays( GL_POINTS, 0, monkey_bone_count );
-		glDisable( GL_PROGRAM_POINT_SIZE );
+		// glDisable( GL_DEPTH_TEST );
+		// glEnable( GL_PROGRAM_POINT_SIZE );
+		// glUseProgram( bones_shader_programme );
+		// glBindVertexArray( bones_vao );
+		// glDrawArrays( GL_POINTS, 0, monkey_bone_count );
+		// glDisable( GL_PROGRAM_POINT_SIZE );
 
 		// update other events like input handling
 		glfwPollEvents();
@@ -523,7 +537,7 @@ int main() {
 		if ( glfwGetKey( g_window, 'Z' ) ) {
 			theta += rot_speed * elapsed_seconds;
 			//g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
-			g_local_anims[1] = rotate_z_deg( identity_mat4(), -theta );
+			g_local_anims[0] = rotate_z_deg( identity_mat4(), -theta );
 			monkey_moved = true;
 		}
 		if ( glfwGetKey( g_window, 'X' ) ) {
@@ -534,12 +548,12 @@ int main() {
 		}
 		if ( glfwGetKey( g_window, 'C' ) ) {
 			y -= 0.5f * elapsed_seconds;
-			g_local_anims[2] = translate( identity_mat4(), vec3( 0.0f, y, 0.0f ) );
+			g_local_anims[1] = translate( identity_mat4(), vec3( 0.0f, y, 0.0f ) );
 			monkey_moved = true;
 		}
 		if ( glfwGetKey( g_window, 'V' ) ) {
 			y += 0.5f * elapsed_seconds;
-			g_local_anims[2] = translate( identity_mat4(), vec3( 0.0f, y, 0.0f ) );
+			g_local_anims[1] = translate( identity_mat4(), vec3( 0.0f, y, 0.0f ) );
 			monkey_moved = true;
 		}
 		if ( monkey_moved ) {
@@ -553,6 +567,8 @@ int main() {
 		if ( GLFW_PRESS == glfwGetKey( g_window, GLFW_KEY_ESCAPE ) ) {
 			glfwSetWindowShouldClose( g_window, 1 );
 		}
+
+
 		// put the stuff we've been drawing onto the display
 		glfwSwapBuffers( g_window );
 	}
