@@ -30,8 +30,8 @@
 #define GL_LOG_FILE "gl.log"
 #define VERTEX_SHADER_FILE "test_vs.glsl"
 #define FRAGMENT_SHADER_FILE "test_fs.glsl"
+#define MESH_FILE "Mario4.fbx"
 //#define MESH_FILE "monkey_with_skeleton_y_up.dae"
-#define MESH_FILE "Mario3.fbx"
 //#define MESH_FILE "sci_fi5.fbx"
 
 /* max bones allowed in a mesh */
@@ -536,14 +536,14 @@ int main() {
 		bool monkey_moved = false;
 		if ( glfwGetKey( g_window, 'Z' ) ) {
 			theta += rot_speed * elapsed_seconds;
-			//g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
-			g_local_anims[0] = rotate_z_deg( identity_mat4(), -theta );
+			g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
+			g_local_anims[0] = rotate_x_deg( identity_mat4(), -theta );
 			monkey_moved = true;
 		}
 		if ( glfwGetKey( g_window, 'X' ) ) {
 			theta -= rot_speed * elapsed_seconds;
-			//g_local_anims[0] = rotate_z_deg( identity_mat4(), theta );
-			g_local_anims[1] = rotate_z_deg( identity_mat4(), -theta );
+			g_local_anims[1] = rotate_y_deg( identity_mat4(), theta );
+			//g_local_anims[1] = rotate_z_deg( identity_mat4(), -theta );
 			monkey_moved = true;
 		}
 		if ( glfwGetKey( g_window, 'C' ) ) {
