@@ -27,7 +27,7 @@
 #define GL_LOG_FILE "gl.log"
 #define VERTEX_SHADER_FILE "test_vs.glsl"
 #define FRAGMENT_SHADER_FILE "test_fs.glsl"
-#define MESH_FILE "Mario2.fbx"
+#define MESH_FILE "Mario4.fbx"
 //#define MESH_FILE "Cylinder2.dae"
 /* max bones allowed in a mesh */
 #define MAX_BONES 32
@@ -499,8 +499,6 @@ bool load_mesh( const char *file_name, GLuint *vao, int *point_count,
   } else {
 
   }
-
-
 	aiReleaseImport( scene );
 	printf( "mesh loaded\n" );
 
